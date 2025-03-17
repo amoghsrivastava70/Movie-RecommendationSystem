@@ -2,7 +2,7 @@ from flask import Flask, render_template ,request
 import requests
 import pickle as pkl
 import numpy as np
-from openai import OpenAI
+
 
 popular=pkl.load(open(r'assets\popular_df.pkl' , 'rb'))
 # print(popular)
@@ -73,7 +73,7 @@ def recommend():
 def more_data():
     rec_query=request.form.get("query")
     
-    api_key="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"
+    api_key="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"
     
 
     
@@ -82,7 +82,7 @@ def more_data():
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     
     data = {
-        "model": "deepseek/deepseek-r1:free",
+        "model": "deepseek/deepseek-chat:free",
         "messages": [{"role": "user", "content": f"Provide me details about the movie '{rec_query}' with plot and other necessary details"}]
     }
     
