@@ -2,6 +2,7 @@ from flask import Flask, render_template ,request
 import requests
 import pickle as pkl
 import numpy as np
+from openai import OpenAI
 
 popular=pkl.load(open(r'assets\popular_df.pkl' , 'rb'))
 # print(popular)
@@ -36,36 +37,64 @@ def recommend():
         for mv in ans_arr:
             recomm.append(movie_data.iloc[mv[0]]['title'])
         
-        # print("Movie Names: ",recomm)
-        api_key='bdca24f0aa8772134dfc3e96fc8b4ac5'
+        
         recommended_movies=[]
+         
+        api_key='cda377a7'
+
         for i in recomm:
-            try:
+                try:
 
-                url = f"https://api.themoviedb.org/3/search/movie?query={i}&api_key={api_key}"
-                response = requests.get(url ,timeout=2)
-
-                if response.status_code == 200:
-                    details = response.json()
-                    if details['results']:
-                        movie = details['results'][0]
+                    url=f"https://www.omdbapi.com/?t={i}&apikey={api_key}"
+                    response = requests.get(url , timeout=4)
+                    if response.status_code==200:
+                        data=response.json()
+                        # print(data)
                         recommended_movies.append({
-                            'poster': f"https://image.tmdb.org/t/p/w500{movie['poster_path']}",
-                            'title': movie['title'],
-                            'release':movie['release_date'],
-                            'lang':movie['original_language'],
-                            'overview': movie['overview']
-                        })
-            # print(recommended_movies)
+                                    'poster': f"{data['Poster']}",
+                                    'title': data['Title'],
+                                    'release':data['Released'],
+                                    'runtime':data['Runtime'],
+                                    'overview': data['Plot']
+                                })
+                    # print(recommended_movies)
+                except requests.exceptions.ConnectTimeout:
+                    return render_template('connectionerr.html')
 
-            except requests.exceptions.ConnectTimeout:
-                return render_template('connectionerr.html') 
-
+        
         return render_template('recom.html',data=recommended_movies)
+
 
     except IndexError:
         return render_template('error.html')
 
+
+@app.route("/more_info",methods=['POST'])
+def more_data():
+    rec_query=request.form.get("query")
+    
+    api_key="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"
+    
+
+    
+    url = "https://openrouter.ai/api/v1/chat/completions"
+    
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    
+    data = {
+        "model": "deepseek/deepseek-r1:free",
+        "messages": [{"role": "user", "content": f"Provide me details about the movie '{rec_query}' with plot and other necessary details"}]
+    }
+    
+    response = requests.post(url, headers=headers, json=data)
+    
+    if response.status_code == 200:
+        data_ret=response.json()["choices"][0]["message"]["content"].replace('**','')
+        return render_template('airesponse.html' , data=data_ret )
+    else:
+        return render_template('error.html')
+    
+    
 
 if __name__ == "__main__":
     app.run(debug=True)
