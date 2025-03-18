@@ -4,12 +4,11 @@ import pickle as pkl
 import numpy as np
 
 
-popular=pkl.load(open(r'assets\popular_df.pkl' , 'rb'))
-# print(popular)
-sim_scr=np.load(r'assets\similarity_scores.npz')['arr_0']
-# print(sim_scr)
-movie_data=pkl.load(open(r'assets\movie_data.pkl','rb'))
-# print(movie_data)
+popular=pkl.load(open("assets/popular_df.pkl" , 'rb'))
+
+sim_scr=np.load("assets/similarity_scores.npz")['arr_0']
+movie_data=pkl.load(open("assets/movie_data.pkl",'rb'))
+
 
 app = Flask(__name__)
 
@@ -73,7 +72,7 @@ def recommend():
 def more_data():
     rec_query=request.form.get("query")
     
-    api_key="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"
+    api_key="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"
     
 
     
